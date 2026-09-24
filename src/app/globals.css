@@ -164,9 +164,10 @@
   width: min(84vw, 64svh, 40rem);
   aspect-ratio: 1;
   translate: 0 -50%;
-  /* Behind the wordmark, so it is held faint enough that a mid-grey pixel in
-     the real photograph still leaves ink above 12:1. */
-  opacity: 0.25;
+  /* Behind the wordmark, so it is held faint enough that even a pure-black
+     pixel of the photograph leaves ink at 12.8:1 and muted at 6.6:1. At 0.25
+     the real droplet photograph took the wordmark down to 8.9:1. */
+  opacity: 0.1;
 }
 
 .opening__mark {

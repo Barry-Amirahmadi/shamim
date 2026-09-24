@@ -31,7 +31,6 @@ npm run preview:pages # http://localhost:4321/shamim/
 | `src/app/motion.css` | Layer 3: scroll-driven motion, and nothing the page needs |
 | `src/components/Bottle.tsx` | The bottle — inline SVG, no image file |
 | `scripts/verify.mjs` | Contrast, native scroll, JS-off, reduced motion, glyphs |
-| `scripts/generate-media.mjs` | Five placeholder JPEGs at the real paths and ratios |
 
 ## Rules that hold everywhere
 

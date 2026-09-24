@@ -13,7 +13,6 @@
     "lint": "eslint .",
     "typecheck": "tsc --noEmit",
     "test:smoke": "playwright test",
-    "media": "node scripts/generate-media.mjs",
     "og": "node scripts/generate-og.mjs",
     "verify": "node scripts/verify.mjs"
   },
