@@ -1,0 +1,105 @@
+/* ============================================================================
+   SHAMIM — DESIGN TOKENS
+   Single source of truth. Nothing in the app hardcodes a colour, a size, a
+   duration or an easing curve; it references a token from this file.
+
+   The ground is not one colour, it is three, and the page descends through
+   them: cold and bright at the top, warm sand in the middle, deep warm dark at
+   the bottom. That descent is the design.
+
+   Measured contrast, re-measured from the shipped stylesheet by
+   scripts/verify.mjs on every run:
+
+     --ink        on open 15.98   on heart 13.33
+     --ink-inv    on base 14.77
+     --muted      on open  8.24   on heart  6.87
+     --muted-inv  on base  8.23
+     --iris       on open  7.10   on heart  5.92
+     --iris-soft  on base  7.89
+     --iris-bright on open 5.38   on heart  4.49  ← fails even the 4.5 display
+                                                   threshold on heart: display
+                                                   type on open and rules only.
+
+   Plain custom properties rather than Tailwind `@theme`: these names are the
+   ones the verification script reads back out of the built CSS, and `@theme`
+   would rename them and drop the ones no utility uses.
+   ========================================================================= */
+
+:root {
+  /* ---- Grounds — the three tiers of the pyramid ------------------------- */
+  --ground-open: #f2f5f4; /* opening and act I — cold, bright, almost white */
+  --ground-heart: #e9dfd4; /* act II — warm sand */
+  --ground-base: #1c1714; /* act III, the object, coda, footer */
+
+  /* ---- Ink ---------------------------------------------------------------- */
+  --ink: #171a19; /* primary text on the two light grounds */
+  --ink-inv: #f0e9e2; /* primary text on the dark ground */
+  --muted: #454a47; /* secondary text on light */
+  --muted-inv: #b9afa4; /* secondary text on dark */
+
+  /* ---- Accent ------------------------------------------------------------- */
+  --iris: #574a80; /* accent as text on light */
+  --iris-soft: #b3a5db; /* accent as text on dark */
+  --iris-bright: #6b5b95; /* display type and rules only, never small text */
+
+  /* ---- Hairlines ---------------------------------------------------------- */
+  --line: #171a1922;
+  --line-inv: #f0e9e21f;
+
+  /* ---- The bottle's liquid ------------------------------------------------
+     Decorative, inside an aria-hidden SVG, so no contrast requirement — and
+     verify.mjs asserts none of the three ever sits under a line of text.     */
+  --liquid-open: #d7e4de;
+  --liquid-heart: #e6c892;
+  --liquid-base: #8a5a2b;
+
+  /* ---- Focus — resolved per ground; see `.on-dark` in globals.css -------- */
+  --focus: var(--iris);
+
+  /* ---- Type families ------------------------------------------------------
+     Aref Ruqaa — calligraphic ruqaa. Wordmark, act names, numerals.
+     Alexandria — body and note lists. SUBSTITUTED for the specified Readex
+                  Pro, which has no پ چ ژ گ ک ی and no Persian digits at all.
+     Wired to next/font in layout.tsx, which declares the two variables.    */
+  --font-display: var(--font-aref), "Aref Ruqaa", serif;
+  --font-body: var(--font-alexandria), "Alexandria", system-ui, sans-serif;
+
+  /* ---- Type scale — fluid, no breakpoint jumps ---------------------------- */
+  --text-wordmark: clamp(6.5rem, 28vw, 17rem);
+  --text-numeral: clamp(5.5rem, 15vw, 15rem);
+  --text-act: clamp(2.75rem, 5vw, 4.5rem);
+  --text-object: clamp(2.75rem, min(6vw, 10svh), 5.5rem);
+  --text-cta: clamp(2.5rem, 4.6vw, 4rem);
+  --text-note: clamp(1.25rem, 1.8vw, 1.5625rem);
+  --text-lead: clamp(1.0625rem, 1.3vw, 1.25rem);
+  --text-body: 1.0625rem; /* 17px — Persian reads small at 16 */
+  --text-label: 0.9375rem;
+  --text-micro: 0.75rem; /* Latin only, and the only tracked text */
+
+  /* ---- Line height — Persian needs more air than Latin, ruqaa more still - */
+  --leading-display: 1.3;
+  --leading-body: 1.95;
+
+  /* ---- Layout ------------------------------------------------------------- */
+  --gutter: clamp(1rem, 4.5vw, 4.5rem);
+  --measure: 26rem;
+
+  /* The bottle: 240 × 520 viewBox, so width is height × 0.4615. */
+  --bottle-h: min(56svh, 34rem);
+  --bottle-w: calc(var(--bottle-h) * 0.4615);
+  --rail-gap: clamp(2rem, 4.5vw, 4.5rem);
+
+  /* ---- Motion ------------------------------------------------------------- */
+  --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+  --ease-in-out: cubic-bezier(0.65, 0, 0.35, 1);
+  --dur-slow: 780ms;
+  --dur-ambient: 900ms;
+}
+
+/* Below 64rem the bottle leaves the centre for a strip at the inline end, so
+   it is smaller and the text column is padded clear of it. */
+@media (max-width: 63.999rem) {
+  :root {
+    --bottle-h: min(30svh, 17rem);
+  }
+}

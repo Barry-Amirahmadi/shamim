@@ -1,0 +1,141 @@
+/* ============================================================================
+   LAYER 3 — MOTION, ADDED ONLY WHERE SUPPORTED
+
+   Everything in this file is optional. Delete it and the page still reads
+   exactly as designed: every word visible, the grounds in place, the bottle
+   and the numerals still held by `position: sticky`. That is the test for
+   whether anything here belongs.
+
+   Decided, and not to be reopened: no animation library, no smooth-scroll
+   library, no `scroll` handler driving anything visual, no `preventDefault`
+   on wheel, touch or key. Scroll stays the browser's own.
+
+   Two paths:
+     - CSS scroll-driven animation, where `animation-timeline` exists.
+     - Elsewhere, RevealObserver.tsx — one IntersectionObserver for the page —
+       adds `.in-view` and sets `data-note`, and CSS transitions do the rest.
+   Under `prefers-reduced-motion: reduce`, neither path runs.
+
+   No reveal touches `opacity` or `visibility`. Text drifts up and comes into
+   focus, but every pixel of it that is on screen is at full colour, so
+   contrast never depends on where in an animation a reader happens to stop,
+   and focus can never land on something invisible.
+   ========================================================================= */
+
+/* Mix amounts for the bottle's liquid. Registered, so they interpolate. */
+@property --mh {
+  syntax: "<number>";
+  inherits: true;
+  initial-value: 0;
+}
+
+@property --mb {
+  syntax: "<number>";
+  inherits: true;
+  initial-value: 0;
+}
+
+/* Named timelines for the two acts where the liquid changes. The bottle is not
+   inside either act; `.descent` widens their scope so it can read them. */
+.act[data-tier="heart"] {
+  view-timeline: --heart block;
+}
+
+.act[data-tier="base"] {
+  view-timeline: --base block;
+}
+
+@keyframes settle {
+  from {
+    transform: translateY(1.25rem);
+    filter: blur(6px);
+  }
+  to {
+    transform: none;
+    filter: none;
+  }
+}
+
+@keyframes to-heart {
+  from {
+    --mh: 0;
+  }
+  to {
+    --mh: 1;
+  }
+}
+
+@keyframes to-base {
+  from {
+    --mb: 0;
+  }
+  to {
+    --mb: 1;
+  }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  /* ---- Scroll-driven path ----------------------------------------------- */
+  @supports (animation-timeline: view()) {
+    [data-reveal] {
+      animation: settle linear both;
+      animation-timeline: view();
+      /* Settled by the time the line is a quarter of the way up the screen. */
+      animation-range: entry 0% cover 28%;
+    }
+  }
+
+  /* The liquid runs on each act's own timeline, across its threshold — the
+     same stretch of scroll over which the ground changes colour behind it. */
+  @supports (animation-timeline: view()) and (timeline-scope: none) {
+    .bottle {
+      animation:
+        to-heart linear both,
+        to-base linear both;
+      animation-timeline: --heart, --base;
+      animation-range: entry 0% entry 70%;
+    }
+  }
+
+  /* ---- IntersectionObserver path ---------------------------------------- */
+  @supports not (animation-timeline: view()) {
+    [data-reveal] {
+      transition:
+        transform var(--dur-slow) var(--ease-out),
+        filter var(--dur-slow) var(--ease-out);
+    }
+
+    /* Armed only by script, and only below the fold: with no script, or with
+       a script that failed, nothing is ever held back. */
+    [data-reveal].is-armed:not(.in-view) {
+      transform: translateY(1.25rem);
+      filter: blur(6px);
+    }
+  }
+
+  @supports not ((animation-timeline: view()) and (timeline-scope: none)) {
+    .bottle {
+      transition:
+        --mh var(--dur-ambient) var(--ease-in-out),
+        --mb var(--dur-ambient) var(--ease-in-out);
+    }
+
+    .descent[data-note="heart"] .bottle {
+      --mh: 1;
+    }
+
+    .descent[data-note="base"] .bottle {
+      --mh: 1;
+      --mb: 1;
+    }
+  }
+}
+
+/* Reduced motion: the liquid takes one fixed colour — the heart's amber — and
+   nothing moves. Sticky is not motion, so the bottle and numerals still hold. */
+@media (prefers-reduced-motion: reduce) {
+  .descent .bottle {
+    --mh: 1;
+    --mb: 0;
+  }
+}

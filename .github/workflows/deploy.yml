@@ -1,0 +1,90 @@
+name: Deploy to GitHub Pages
+
+# Publishes the static export. Requires GitHub Pages to be set to
+# "Source: GitHub Actions" once, in Settings → Pages.
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+# Let a running deploy finish rather than cancelling it half-published.
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+
+      - run: npm ci
+
+      # Configure Pages reports where the site will actually be served from, so
+      # the base path is detected rather than hardcoded: "/repo-name" for a
+      # project site, "/" for a user/org site or a custom domain.
+      - name: Configure Pages
+        id: pages
+        uses: actions/configure-pages@v5
+
+      - name: Typecheck
+        run: npm run typecheck
+
+      - name: Build static export
+        env:
+          NEXT_PUBLIC_BASE_PATH: ${{ steps.pages.outputs.base_path }}
+          NEXT_PUBLIC_SITE_URL: ${{ steps.pages.outputs.origin }}
+        run: npm run build
+
+      # Without this, GitHub Pages runs the output through Jekyll, which
+      # silently drops every directory beginning with an underscore — including
+      # _next, i.e. all the CSS and JS. It is also committed at public/.nojekyll
+      # so the branch-deploy method is covered too.
+      - name: Ensure .nojekyll
+        run: touch out/.nojekyll
+
+      # Gate, not decoration: this project has twice shipped defects that were
+      # invisible to `next dev` and only appeared once the export was served off
+      # disk. The suite runs against the same `out/` that is about to be
+      # uploaded, under the base path this deployment will actually use, so a
+      # build that fails it never reaches the site.
+      - name: Install Playwright Chromium
+        run: npx playwright install --with-deps chromium
+
+      - name: Smoke test the export
+        env:
+          SMOKE_BASE_PATH: ${{ steps.pages.outputs.base_path }}
+        run: npm run test:smoke
+
+      - name: Upload smoke report on failure
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-report
+          path: playwright-report/
+          retention-days: 7
+
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: ./out
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v4

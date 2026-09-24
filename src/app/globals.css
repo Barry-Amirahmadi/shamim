@@ -1,0 +1,625 @@
+@import "tailwindcss";
+@import "./tokens.css";
+@import "./motion.css";
+
+/* ============================================================================
+   SHAMIM — ONE PAGE, THREE GROUNDS
+
+   Tailwind is here for its preflight and nothing else; no utility class is
+   used. Every rule below is plain CSS against named classes.
+
+   Three layers, each complete on its own (see motion.css for the third):
+
+     1  Every word is in the served HTML, at full opacity, in document order.
+        The grounds are plain per-block backgrounds. Nothing is hidden.
+     2  `position: sticky` does the structural work — the bottle, and the act
+        numerals on wide screens. No script, and it cannot desynchronise from
+        scroll because it *is* scroll.
+     3  Motion, only where supported, only without reduced motion.
+
+   Rules that are not negotiable anywhere in this file:
+     - no `overflow: hidden` on html or body, at any breakpoint
+     - no `will-change` on anything taller than the viewport
+     - `svh`, never `vh`
+     - no `letter-spacing` on Persian text — it breaks the cursive join
+   ========================================================================= */
+
+@layer base {
+  html {
+    -webkit-text-size-adjust: 100%;
+    /* The page ends dark; an iOS overscroll at the bottom shows this. */
+    background-color: var(--ground-base);
+  }
+
+  body {
+    margin: 0;
+    color: var(--ink);
+    font-family: var(--font-body);
+    font-size: var(--text-body);
+    font-weight: 300;
+    line-height: var(--leading-body);
+    text-rendering: optimizeLegibility;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  ::selection {
+    background-color: var(--iris-soft);
+    color: var(--ink);
+  }
+}
+
+/* ---- Focus: one ring, resolved per ground ------------------------------- */
+
+:focus-visible {
+  outline: 2px solid var(--focus);
+  outline-offset: 4px;
+  border-radius: 2px;
+}
+
+.on-dark {
+  --focus: var(--iris-soft);
+}
+
+.skip-link {
+  position: absolute;
+  inset-inline-start: var(--gutter);
+  top: 0.75rem;
+  z-index: 10;
+  padding: 0.5rem 1rem;
+  background-color: var(--ground-open);
+  color: var(--ink);
+  font-size: var(--text-label);
+  word-spacing: 0.18em;
+}
+
+.skip-link:not(:focus) {
+  clip-path: inset(50%);
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  overflow: hidden;
+  white-space: nowrap;
+}
+
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+/* ---- Header: the wordmark and one link, nothing more ---------------------
+   Absolutely placed over the opening, so the opening stays exactly 100svh,
+   and not sticky: a fixed bar would have to cross the dark-to-light seam,
+   where no single ink colour is legible at every point. */
+
+.masthead {
+  position: absolute;
+  inset-inline: 0;
+  top: 0;
+  z-index: 3;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 1rem var(--gutter);
+}
+
+.masthead__mark {
+  font-family: var(--font-display);
+  font-size: 1.75rem;
+  line-height: var(--leading-display);
+  color: var(--ink);
+}
+
+.masthead__link {
+  padding-block: 0.5rem;
+  font-size: var(--text-label);
+  word-spacing: 0.18em;
+  color: var(--ink);
+  text-decoration: underline;
+  text-decoration-color: var(--iris-bright);
+  text-decoration-thickness: 1px;
+  text-underline-offset: 0.55em;
+}
+
+/* ---- Atmosphere: a photograph as air, never as a surface -----------------
+   Always decorative, always faded at its edges, and — except for the faint
+   one behind the wordmark — only ever where no text sits. */
+
+.air {
+  position: absolute;
+  z-index: 0;
+  pointer-events: none;
+  mask-image: radial-gradient(closest-side, #000 42%, transparent 100%);
+}
+
+.air img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+/* ---- 1 · Opening --------------------------------------------------------- */
+
+.opening {
+  position: relative;
+  display: grid;
+  place-content: center;
+  justify-items: center;
+  min-height: 100svh;
+  padding: 6rem var(--gutter) 4rem;
+  overflow: clip;
+  background-color: var(--ground-open);
+  text-align: center;
+}
+
+.opening__air {
+  top: 50%;
+  inset-inline: 0;
+  margin-inline: auto;
+  width: min(84vw, 64svh, 40rem);
+  aspect-ratio: 1;
+  translate: 0 -50%;
+  /* Behind the wordmark, so it is held faint enough that a mid-grey pixel in
+     the real photograph still leaves ink above 12:1. */
+  opacity: 0.25;
+}
+
+.opening__mark {
+  position: relative;
+  z-index: 1;
+  font-family: var(--font-display);
+  font-size: var(--text-wordmark);
+  font-weight: 400;
+  line-height: var(--leading-display);
+  color: var(--ink);
+}
+
+.opening__line {
+  position: relative;
+  z-index: 1;
+  max-width: 22rem;
+  margin-top: 0.5rem;
+  font-size: var(--text-lead);
+  color: var(--muted);
+  text-wrap: balance;
+}
+
+/* ---- The descent: acts I–III and the object, with the bottle held over them */
+
+.descent {
+  position: relative;
+  /* Lets the bottle, which is not inside any act, read the acts' timelines. */
+  timeline-scope: --heart, --base;
+}
+
+/* The rail spans the whole descent, but stops half a viewport short of its
+   end: that is what makes the bottle's last stuck position the exact centre of
+   the object block rather than its bottom edge. */
+.descent__rail {
+  position: absolute;
+  z-index: 1;
+  inset-inline: 0;
+  top: 0;
+  bottom: calc(50svh - var(--bottle-h) / 2);
+  pointer-events: none;
+}
+
+.bottle {
+  --bottle-line: color-mix(in oklab, var(--iris-bright), var(--iris-soft) calc(var(--mb) * 100%));
+  position: sticky;
+  top: calc(50svh - var(--bottle-h) / 2);
+  width: var(--bottle-w);
+  height: var(--bottle-h);
+  margin-inline: auto;
+}
+
+.bottle svg {
+  display: block;
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+}
+
+.bottle__glass {
+  fill: color-mix(in oklab, var(--bottle-line) 8%, transparent);
+}
+
+.bottle__liquid {
+  fill: color-mix(
+    in oklab,
+    color-mix(in oklab, var(--liquid-open), var(--liquid-heart) calc(var(--mh) * 100%)),
+    var(--liquid-base) calc(var(--mb) * 100%)
+  );
+}
+
+.bottle__outline {
+  fill: none;
+  stroke: var(--bottle-line);
+  stroke-width: 1.5px;
+  vector-effect: non-scaling-stroke;
+}
+
+.bottle__stopper {
+  fill: var(--bottle-line);
+}
+
+.bottle__glint {
+  fill: none;
+  stroke: #ffffff;
+  stroke-opacity: 0.45;
+  stroke-width: 1.5px;
+  stroke-linecap: round;
+  vector-effect: non-scaling-stroke;
+}
+
+/* ---- 2–4 · The acts — one component, three records -----------------------
+   Each act opens with a text-free threshold. The ground changes across it,
+   and the act's photograph hangs in it as air: text never sits on a colour
+   that is between two tokens, and never on a photograph. */
+
+.act {
+  --threshold: 56svh;
+  position: relative;
+  overflow: clip;
+  background-color: var(--act-ground);
+  background-image: linear-gradient(
+    to bottom,
+    var(--act-from) 0,
+    var(--act-ground) var(--threshold)
+  );
+  color: var(--act-ink);
+}
+
+.act[data-tier="open"] {
+  --act-from: var(--ground-open);
+  --act-ground: var(--ground-open);
+  --act-ink: var(--ink);
+  --act-muted: var(--muted);
+  --act-accent: var(--iris-bright); /* display only: 5.38 on open */
+  --act-rule: var(--line);
+  --act-rule-strong: var(--iris-bright);
+  --act-scale: 1;
+  --act-weight: 300;
+  --act-display-weight: 400;
+  --air-opacity: 0.55;
+}
+
+.act[data-tier="heart"] {
+  --threshold: 64svh;
+  --act-from: var(--ground-open);
+  --act-ground: var(--ground-heart);
+  --act-ink: var(--ink);
+  --act-muted: var(--muted);
+  /* Not --iris-bright: it measures 4.49 on this ground, under even the 4.5
+     display threshold. --iris measures 5.92. */
+  --act-accent: var(--iris);
+  --act-rule: var(--line);
+  --act-rule-strong: var(--iris-bright);
+  --act-scale: 1.12;
+  --act-weight: 400;
+  --act-display-weight: 400;
+  --air-opacity: 0.55;
+}
+
+.act[data-tier="base"] {
+  --threshold: 76svh;
+  --act-from: var(--ground-heart);
+  --act-ground: var(--ground-base);
+  --act-ink: var(--ink-inv);
+  --act-muted: var(--muted-inv);
+  --act-accent: var(--iris-soft);
+  --act-rule: var(--line-inv);
+  --act-rule-strong: var(--iris-soft);
+  --act-scale: 1.26;
+  --act-weight: 500;
+  --act-display-weight: 700;
+  --air-opacity: 0.7;
+}
+
+.act__threshold {
+  position: relative;
+  height: var(--threshold);
+}
+
+.act__air {
+  inset: 0;
+  margin: auto;
+  width: min(100%, calc(var(--threshold) * 1.5));
+  height: 100%;
+  opacity: var(--air-opacity);
+}
+
+.act__stage {
+  position: relative;
+  z-index: 2;
+  display: flex;
+  flex-direction: column;
+  gap: 8svh;
+  min-height: 110svh;
+  padding: 6svh var(--gutter) 22svh;
+  /* Clear of the bottle strip at the inline end (the left, in RTL). */
+  padding-inline-end: calc(var(--bottle-w) + var(--gutter) + 1.25rem);
+}
+
+.act__numeral {
+  font-family: var(--font-display);
+  font-size: calc(var(--text-numeral) * 0.62);
+  font-weight: 400;
+  line-height: 1;
+  color: var(--act-accent);
+}
+
+.act__text {
+  display: flex;
+  flex-direction: column;
+  gap: 8svh;
+  max-width: var(--measure);
+}
+
+.act__name {
+  font-family: var(--font-display);
+  font-size: calc(var(--text-act) * var(--act-scale));
+  font-weight: var(--act-display-weight);
+  line-height: var(--leading-display);
+  text-wrap: balance;
+  color: var(--act-ink);
+}
+
+.act__notes {
+  border-top: 2px solid var(--act-rule-strong);
+}
+
+.act__notes li {
+  padding-block: 0.55em;
+  border-bottom: 1px solid var(--act-rule);
+  font-size: calc(var(--text-note) * var(--act-scale));
+  font-weight: var(--act-weight);
+  line-height: 1.7;
+  color: var(--act-ink);
+}
+
+.act__sentence {
+  font-size: calc(var(--text-lead) * var(--act-scale));
+  font-weight: var(--act-weight);
+  line-height: 2;
+  color: var(--act-muted);
+}
+
+/* Wide screens: a triptych. Text at the inline start, the bottle in the
+   centre column, the numeral alone at the inline end — where nothing else
+   ever scrolls past it, which is the only reason it can be sticky. */
+@media (min-width: 64rem) {
+  .act__stage {
+    display: grid;
+    grid-template-columns: 1fr calc(var(--bottle-w) + 2 * var(--rail-gap)) 1fr;
+    align-items: start;
+    min-height: 125svh;
+    padding: 8svh var(--gutter) 24svh;
+  }
+
+  .act__text {
+    grid-column: 1;
+    grid-row: 1;
+    gap: 14svh;
+    padding-top: 6svh;
+  }
+
+  .act__numeral {
+    grid-column: 3;
+    grid-row: 1;
+    justify-self: center;
+    position: sticky;
+    top: calc(50svh - var(--text-numeral) / 2);
+    font-size: var(--text-numeral);
+  }
+}
+
+/* ---- 5 · The object ------------------------------------------------------ */
+
+.object {
+  position: relative;
+  overflow: clip;
+  background-color: var(--ground-base);
+  color: var(--ink-inv);
+}
+
+.object__air {
+  top: 50%;
+  inset-inline-end: calc(var(--gutter) - var(--rail-gap) / 2);
+  width: calc(var(--bottle-w) + var(--rail-gap));
+  aspect-ratio: 1;
+  translate: 0 -50%;
+  opacity: 0.8;
+}
+
+.object__stage {
+  position: relative;
+  z-index: 2;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 1.5rem;
+  min-height: 100svh;
+  padding: 3rem var(--gutter);
+  padding-inline-end: calc(var(--bottle-w) + var(--gutter) + 1.25rem);
+}
+
+.object__latin {
+  font-size: var(--text-micro);
+  font-weight: 400;
+  letter-spacing: 0.32em; /* Latin only. Never on Persian. */
+  color: var(--muted-inv);
+}
+
+.object__name {
+  font-family: var(--font-display);
+  font-size: var(--text-object);
+  font-weight: 700;
+  line-height: var(--leading-display);
+  color: var(--ink-inv);
+}
+
+.object__coda {
+  display: flex;
+  flex-direction: column;
+  font-size: var(--text-lead);
+  line-height: 2;
+  color: var(--muted-inv);
+}
+
+.object__coda span:first-child {
+  color: var(--ink-inv);
+}
+
+.object__gap {
+  display: none;
+}
+
+/* Wide screens: the bottle comes to rest dead centre, name above, coda below.
+   The middle row is the bottle's own height, and the rail ends so that the
+   bottle's last stuck position is exactly this row. */
+@media (min-width: 64rem) {
+  .object__air {
+    inset-inline: 0;
+    margin-inline: auto;
+    width: var(--bottle-h);
+  }
+
+  .object__stage {
+    display: grid;
+    grid-template-rows: 1fr var(--bottle-h) 1fr;
+    justify-items: center;
+    gap: 0;
+    height: 100svh;
+    padding-block: 0;
+    padding-inline-end: var(--gutter);
+    text-align: center;
+  }
+
+  .object__head {
+    align-self: end;
+    padding-bottom: 1.25rem;
+  }
+
+  .object__gap {
+    display: block;
+  }
+
+  .object__coda {
+    align-self: start;
+    padding-top: 1.25rem;
+  }
+}
+
+/* ---- 6 · Coda — the one call to action ----------------------------------- */
+
+.coda {
+  padding: 16svh var(--gutter) 14svh;
+  background-color: var(--ground-base);
+  color: var(--ink-inv);
+  text-align: center;
+}
+
+.coda__inner {
+  display: grid;
+  justify-items: center;
+  gap: 1.75rem;
+  max-width: 34rem;
+  margin-inline: auto;
+}
+
+.coda__heading {
+  font-family: var(--font-display);
+  font-size: var(--text-cta);
+  font-weight: 700;
+  line-height: var(--leading-display);
+  color: var(--ink-inv);
+}
+
+.coda__sentence {
+  font-size: var(--text-lead);
+  color: var(--muted-inv);
+  text-wrap: balance;
+}
+
+.coda__links {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 1rem 3rem;
+}
+
+.coda__link {
+  padding-block: 0.5rem;
+  font-size: 1.25rem;
+  font-weight: 400;
+  color: var(--iris-soft);
+  text-decoration: underline;
+  text-decoration-thickness: 1px;
+  text-underline-offset: 0.55em;
+}
+
+/* ---- 7 · Footer ---------------------------------------------------------- */
+
+.footer {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 0.75rem 2rem;
+  padding: 2rem var(--gutter) 2.5rem;
+  border-top: 1px solid var(--line-inv);
+  background-color: var(--ground-base);
+  font-size: var(--text-label);
+  word-spacing: 0.18em;
+  color: var(--muted-inv);
+}
+
+.footer__mark {
+  font-family: var(--font-display);
+  font-size: 1.75rem;
+  line-height: var(--leading-display);
+  word-spacing: normal;
+  color: var(--ink-inv);
+}
+
+/* ---- 404 ------------------------------------------------------------------ */
+
+.lost {
+  display: grid;
+  place-content: center;
+  justify-items: center;
+  gap: 1.25rem;
+  min-height: 100svh;
+  padding: 6rem var(--gutter) 4rem;
+  background-color: var(--ground-open);
+  text-align: center;
+}
+
+.lost__title {
+  font-family: var(--font-display);
+  font-size: var(--text-cta);
+  line-height: var(--leading-display);
+  text-wrap: balance;
+  color: var(--ink);
+}
+
+.lost__lead {
+  max-width: var(--measure);
+  font-size: var(--text-lead);
+  color: var(--muted);
+}
+
+.lost__link {
+  padding-block: 0.5rem;
+  color: var(--iris);
+  font-weight: 400;
+  text-decoration: underline;
+  text-decoration-thickness: 1px;
+  text-underline-offset: 0.55em;
+}

@@ -1,0 +1,37 @@
+{
+  "name": "shamim-fragrance",
+  "version": "0.1.0",
+  "private": true,
+  "description": "SHAMIM — a single-page Persian scroll launch for one fragrance. RTL-first static export for GitHub Pages",
+  "scripts": {
+    "dev": "next dev -p 3210",
+    "build": "next build",
+    "build:pages": "node scripts/build-pages.mjs",
+    "postbuild": "node scripts/flatten-rsc-payloads.mjs",
+    "preview": "node scripts/serve-static.mjs --port 4321",
+    "preview:pages": "node scripts/serve-static.mjs --port 4321 --base shamim",
+    "lint": "eslint .",
+    "typecheck": "tsc --noEmit",
+    "test:smoke": "playwright test",
+    "media": "node scripts/generate-media.mjs",
+    "og": "node scripts/generate-og.mjs",
+    "verify": "node scripts/verify.mjs"
+  },
+  "dependencies": {
+    "next": "16.3.5",
+    "react": "19.3.0",
+    "react-dom": "19.3.0"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.63.0",
+    "@tailwindcss/postcss": "4.3.3",
+    "@types/node": "^24.0.0",
+    "@types/react": "^19.3.0",
+    "@types/react-dom": "^19.3.0",
+    "eslint": "^9.39.5",
+    "eslint-config-next": "^16.3.5",
+    "eslint-plugin-jsx-a11y": "^6.10.2",
+    "tailwindcss": "4.3.3",
+    "typescript": "^5.9.0"
+  }
+}
