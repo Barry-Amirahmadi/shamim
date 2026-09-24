@@ -21,7 +21,9 @@ import { defineConfig, devices } from "@playwright/test";
  */
 const raw = process.env.SMOKE_BASE_PATH ?? "/shamim";
 const BASE_PATH = raw === "/" ? "" : raw.replace(/\/+$/, "");
-const PORT = 4321;
+// Sibling template builds default to 4321 too, and reuseExistingServer would
+// silently run these tests against whichever site already holds the port.
+const PORT = Number(process.env.SMOKE_PORT ?? 4321);
 
 export default defineConfig({
   testDir: "./tests",

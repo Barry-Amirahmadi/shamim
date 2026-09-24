@@ -218,6 +218,15 @@
   margin-inline: auto;
 }
 
+/* Below 64rem the bottle leaves the centre for the strip at the inline end —
+   the left, in RTL — which every stage's padding-inline-end already keeps
+   clear. Without this it stays centred and the sentences run across it. */
+@media (max-width: 63.999rem) {
+  .bottle {
+    margin-inline: auto var(--gutter);
+  }
+}
+
 .bottle svg {
   display: block;
   width: 100%;
