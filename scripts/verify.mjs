@@ -287,15 +287,17 @@ for (const width of WIDTHS) {
   const response = await page.goto(HOME, { waitUntil: "networkidle" });
   r.status = response.status();
 
-  /* 14 — first-load transfer, before anything scrolls */
+  /* 14 — first-load transfer, before anything scrolls. Images are matched by
+     path, not initiatorType: the eager opening image is fetched by a
+     <link rel=preload>, so it reports as "link" and an "img" filter drops it. */
   r.firstLoad = await page.evaluate(() => {
     const entries = performance.getEntriesByType("resource");
     const nav = performance.getEntriesByType("navigation")[0];
     const sum = (list) => list.reduce((s, e) => s + (e.transferSize || e.encodedBodySize || 0), 0);
     return {
       total: sum(entries) + (nav?.transferSize ?? 0),
-      images: sum(entries.filter((e) => e.initiatorType === "img")),
-      imageCount: entries.filter((e) => e.initiatorType === "img").length,
+      images: sum(entries.filter((e) => new URL(e.name).pathname.startsWith("/shamim/media/"))),
+      imageCount: entries.filter((e) => new URL(e.name).pathname.startsWith("/shamim/media/")).length,
       video: sum(entries.filter((e) => e.initiatorType === "video" || /\.mp4/.test(e.name))),
     };
   });
@@ -479,7 +481,7 @@ for (const width of WIDTHS) {
 
   /* 14 — image weight after the full descent */
   r.weights = await page.evaluate(() => {
-    const imgs = performance.getEntriesByType("resource").filter((e) => e.initiatorType === "img");
+    const imgs = performance.getEntriesByType("resource").filter((e) => new URL(e.name).pathname.startsWith("/shamim/media/"));
     return { count: imgs.length, bytes: imgs.reduce((s, e) => s + (e.encodedBodySize || 0), 0), list: imgs.map((e) => `${e.name.split("/").pop()} ${(e.encodedBodySize / 1024).toFixed(0)}KB`) };
   });
 
